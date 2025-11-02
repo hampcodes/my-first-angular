@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,13 +9,18 @@ import { CommonModule } from '@angular/common';
     <div class="user-card">
       <h2>Perfil de Usuario</h2>
 
-      <p><strong>Nombre:</strong> {{ userName }}</p>
-      <p><strong>Edad:</strong> {{ age }}</p>
-      <p><strong>Email:</strong> {{ email }}</p>
-      <p><strong>Estado:</strong> {{ isActive ? 'Activo' : 'Inactivo' }}</p>
+      <!-- Leer signals con () -->
+      <p><strong>Nombre:</strong> {{ userName() }}</p>
+      <p><strong>Edad:</strong> {{ age() }}</p>
+      <p><strong>Email:</strong> {{ email() }}</p>
+      <p><strong>Estado:</strong> {{ isActive() ? 'Activo' : 'Inactivo' }}</p>
+
+      <!-- Computed signal -->
+      <p><strong>Info Completa:</strong> {{ fullInfo() }}</p>
 
       <button (click)="updateProfile()">Actualizar Perfil</button>
       <button (click)="sendEmail()">Enviar Email</button>
+      <button (click)="incrementAge()">Aumentar Edad</button>
     </div>
  `,
  styles: [
@@ -51,17 +56,29 @@ import { CommonModule } from '@angular/common';
  ]
 })
 export class UserProfileComponent {
-  userName: string = 'Juan Pérez';
-  age: number = 28;
-  email: string = 'juan.perez@example.com';
-  isActive: boolean = true;
+  // Signals básicos
+  userName = signal('Juan Pérez');
+  age = signal(28);
+  email = signal('juan.perez@example.com');
+  isActive = signal(true);
+
+  // Computed signal - se calcula automáticamente
+  fullInfo = computed(() => {
+    return `${this.userName()} - ${this.age()} años`;
+  });
 
   updateProfile(): void {
-    this.userName = 'Juan Carlos Pérez';
+    // Usar .set() para cambiar el valor
+    this.userName.set('Juan Carlos Pérez');
     console.log('Perfil actualizado');
   }
 
   sendEmail(): void {
-    console.log(`Enviando email a: ${this.email}`);
+    console.log(`Enviando email a: ${this.email()}`);
+  }
+
+  incrementAge(): void {
+    // Usar .update() para modificar basándose en el valor actual
+    this.age.update(currentAge => currentAge + 1);
   }
 }
