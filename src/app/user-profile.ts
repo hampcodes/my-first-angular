@@ -97,6 +97,64 @@ import { CustomValidators } from './custom-validators';
             }
           </div>
 
+          <!-- Campo Password -->
+          <div class="form-group">
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Contraseña"
+              [class.error]="password?.invalid && password?.touched">
+
+            @if (password?.invalid && password?.touched) {
+              @if (password?.hasError('required')) {
+                <span class="error-message">La contraseña es requerida</span>
+              }
+              @if (password?.hasError('minlength')) {
+                <span class="error-message">Mínimo 8 caracteres</span>
+              }
+              @if (password?.hasError('weakPassword')) {
+                <div class="error-message">
+                  <p>La contraseña debe contener:</p>
+                  <ul>
+                    @if (password?.errors?.['weakPassword']?.minLength) {
+                      <li>Al menos 8 caracteres</li>
+                    }
+                    @if (password?.errors?.['weakPassword']?.requiresUppercase) {
+                      <li>Al menos una mayúscula</li>
+                    }
+                    @if (password?.errors?.['weakPassword']?.requiresLowercase) {
+                      <li>Al menos una minúscula</li>
+                    }
+                    @if (password?.errors?.['weakPassword']?.requiresNumber) {
+                      <li>Al menos un número</li>
+                    }
+                    @if (password?.errors?.['weakPassword']?.requiresSpecialChar) {
+                      <li>Al menos un carácter especial (!@#$%...)</li>
+                    }
+                  </ul>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Campo Confirmar Password -->
+          <div class="form-group">
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirmar contraseña"
+              [class.error]="confirmPassword?.invalid && confirmPassword?.touched">
+
+            @if (confirmPassword?.invalid && confirmPassword?.touched) {
+              @if (confirmPassword?.hasError('required')) {
+                <span class="error-message">Debe confirmar la contraseña</span>
+              }
+              @if (confirmPassword?.hasError('fieldsMismatch')) {
+                <span class="error-message">Las contraseñas no coinciden</span>
+              }
+            }
+          </div>
+
           <div class="form-group">
             <select formControlName="role">
               <option value="">Seleccionar rol</option>
@@ -194,6 +252,15 @@ import { CustomValidators } from './custom-validators';
       display: block;
     }
 
+    .error-message ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+
+    .error-message li {
+      margin: 3px 0;
+    }
+
     .stats {
       background-color: #e3f2fd;
       padding: 15px;
@@ -271,6 +338,7 @@ export class UserProfileComponent {
       age: 28,
       email: 'juan.perez@empresa.com',
       phone: '987654321',
+      password: 'Password123!',
       isActive: true,
       role: 'Administrador'
     },
@@ -280,6 +348,7 @@ export class UserProfileComponent {
       age: 32,
       email: 'maria.garcia@empresa.com',
       phone: '912345678',
+      password: 'SecurePass456!',
       isActive: true,
       role: 'Usuario'
     },
@@ -289,6 +358,7 @@ export class UserProfileComponent {
       age: 45,
       email: 'pedro.lopez@company.pe',
       phone: '998877665',
+      password: 'MyPass789!',
       isActive: false,
       role: 'Usuario'
     }
@@ -340,7 +410,24 @@ export class UserProfileComponent {
           CustomValidators.peruvianPhoneValidator()
         ]
       ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          CustomValidators.strongPasswordValidator()
+        ]
+      ],
+      confirmPassword: [
+        '',
+        [
+          Validators.required
+        ]
+      ],
       role: ['Usuario', Validators.required]
+    }, {
+      // Validador a nivel de formulario para comparar passwords
+      validators: CustomValidators.matchFields('password', 'confirmPassword')
     });
   }
 
@@ -361,6 +448,14 @@ export class UserProfileComponent {
     return this.userForm.get('phone');
   }
 
+  get password() {
+    return this.userForm.get('password');
+  }
+
+  get confirmPassword() {
+    return this.userForm.get('confirmPassword');
+  }
+
   // AGREGAR nuevo usuario
   addUser(): void {
     if (this.userForm.valid) {
@@ -372,6 +467,7 @@ export class UserProfileComponent {
         age: formValue.age,
         email: formValue.email,
         phone: formValue.phone,
+        password: formValue.password, // ✅ En producción, esto debe hashearse
         isActive: true,
         role: formValue.role
       };
