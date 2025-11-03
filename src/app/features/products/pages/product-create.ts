@@ -2,7 +2,6 @@ import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ProductValidator } from '../validator/product.validator';
 import { ProductService } from '../../../core/services/product.service';
 import { CreateProductDto } from '../../../core/models/product.model';
 
@@ -45,9 +44,6 @@ import { CreateProductDto } from '../../../core/models/product.model';
             @if (title?.hasError('minlength')) {
               <span class="error-message">Mínimo 3 caracteres</span>
             }
-            @if (title?.hasError('invalidTitle')) {
-              <span class="error-message">{{ title?.errors?.['invalidTitle'].message }}</span>
-            }
           }
         </div>
 
@@ -63,9 +59,6 @@ import { CreateProductDto } from '../../../core/models/product.model';
           @if (price?.invalid && price?.touched) {
             @if (price?.hasError('required')) {
               <span class="error-message">El precio es requerido</span>
-            }
-            @if (price?.hasError('invalidPrice')) {
-              <span class="error-message">{{ price?.errors?.['invalidPrice'].message }}</span>
             }
           }
         </div>
@@ -100,12 +93,6 @@ import { CreateProductDto } from '../../../core/models/product.model';
             @if (description?.hasError('required')) {
               <span class="error-message">La descripción es requerida</span>
             }
-            @if (description?.hasError('shortDescription')) {
-              <span class="error-message">{{ description?.errors?.['shortDescription'].message }}</span>
-            }
-            @if (description?.hasError('longDescription')) {
-              <span class="error-message">{{ description?.errors?.['longDescription'].message }}</span>
-            }
           }
         </div>
 
@@ -120,9 +107,6 @@ import { CreateProductDto } from '../../../core/models/product.model';
           @if (image?.invalid && image?.touched) {
             @if (image?.hasError('required')) {
               <span class="error-message">La URL de la imagen es requerida</span>
-            }
-            @if (image?.hasError('invalidImageUrl')) {
-              <span class="error-message">{{ image?.errors?.['invalidImageUrl'].message }}</span>
             }
           }
 
@@ -143,138 +127,7 @@ import { CreateProductDto } from '../../../core/models/product.model';
         </div>
       </form>
     </div>
-  `,
-  styles: [`
-    .create-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .header {
-      margin-bottom: 2rem;
-    }
-
-    .header h2 {
-      margin: 0;
-      color: #333;
-    }
-
-    .success-box {
-      background-color: #e8f5e9;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #4caf50;
-      color: #2e7d32;
-      margin-bottom: 2rem;
-    }
-
-    .error-box {
-      background-color: #ffebee;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #f44336;
-      color: #c62828;
-      margin-bottom: 2rem;
-    }
-
-    .product-form {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #333;
-      font-weight: 500;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      transition: border-color 0.3s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #1976d2;
-    }
-
-    input.error, select.error, textarea.error {
-      border-color: #f44336;
-    }
-
-    .error-message {
-      display: block;
-      color: #f44336;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-    }
-
-    .image-preview {
-      margin-top: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 1rem;
-      text-align: center;
-    }
-
-    .image-preview img {
-      max-width: 200px;
-      max-height: 200px;
-      object-fit: contain;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .btn-primary, .btn-secondary {
-      flex: 1;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s;
-    }
-
-    .btn-primary {
-      background-color: #1976d2;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background-color: #1565c0;
-    }
-
-    .btn-primary:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background-color: white;
-      color: #1976d2;
-      border: 2px solid #1976d2;
-    }
-
-    .btn-secondary:hover {
-      background-color: #e3f2fd;
-    }
-  `]
+  `
 })
 export class ProductCreateComponent {
   private productService = inject(ProductService);
@@ -291,21 +144,17 @@ export class ProductCreateComponent {
     this.productForm = this.fb.group({
       title: ['', [
         Validators.required,
-        Validators.minLength(3),
-        ProductValidator.titleValidator()
+        Validators.minLength(3)
       ]],
       price: ['', [
-        Validators.required,
-        ProductValidator.priceValidator()
+        Validators.required
       ]],
       category: ['', Validators.required],
       description: ['', [
-        Validators.required,
-        ProductValidator.descriptionValidator()
+        Validators.required
       ]],
       image: ['', [
-        Validators.required,
-        ProductValidator.imageUrlValidator()
+        Validators.required
       ]]
     });
   }
