@@ -3,6 +3,7 @@ export interface User {
   userName: string;
   age: number;
   email: string;
+  phone: string;
   isActive: boolean;
-  role?: string; // Opcional
+  role?: string;//?opcional
 }
