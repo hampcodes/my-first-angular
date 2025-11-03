@@ -1,22 +1,26 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { User } from './user';
 
 @Component({
  selector: 'app-user-profile',
  standalone: true,
  imports: [CommonModule],
  template: `
-    <div class="user-card">
+   <div class="user-card">
       <h2>Perfil de Usuario</h2>
 
-      <!-- Leer signals con () -->
-      <p><strong>Nombre:</strong> {{ userName() }}</p>
-      <p><strong>Edad:</strong> {{ age() }}</p>
-      <p><strong>Email:</strong> {{ email() }}</p>
-      <p><strong>Estado:</strong> {{ isActive() ? 'Activo' : 'Inactivo' }}</p>
+      <!-- Acceder a propiedades del signal de objeto -->
+      <p><strong>ID:</strong> {{ user().id }}</p>
+      <p><strong>Nombre:</strong> {{ user().userName }}</p>
+      <p><strong>Edad:</strong> {{ user().age }}</p>
+      <p><strong>Email:</strong> {{ user().email }}</p>
+      <p><strong>Estado:</strong> {{ user().isActive ? 'Activo' : 'Inactivo' }}</p>
+      <p><strong>Rol:</strong> {{ user().role || 'No asignado' }}</p>
 
-      <!-- Computed signal -->
+      <!-- Computed signals -->
       <p><strong>Info Completa:</strong> {{ fullInfo() }}</p>
+      <p><strong>Categoría de Edad:</strong> {{ ageCategory() }}</p>
 
       <button (click)="updateProfile()">Actualizar Perfil</button>
       <button (click)="sendEmail()">Enviar Email</button>
@@ -56,29 +60,50 @@ import { CommonModule } from '@angular/common';
  ]
 })
 export class UserProfileComponent {
-  // Signals básicos
-  userName = signal('Juan Pérez');
-  age = signal(28);
-  email = signal('juan.perez@example.com');
-  isActive = signal(true);
-
-  // Computed signal - se calcula automáticamente
-  fullInfo = computed(() => {
-    return `${this.userName()} - ${this.age()} años`;
+   // Signal con objeto tipado (modelo User)
+  user = signal<User>({
+    id: 1,
+    userName: 'Juan Pérez',
+    age: 28,
+    email: 'juan.perez@example.com',
+    isActive: true,
+    role: 'Usuario'
   });
 
+  // Computed signals que usan el modelo
+  fullInfo = computed(() => {
+    const currentUser = this.user();
+    return `${currentUser.userName} - ${currentUser.age} años - ${currentUser.email}`;
+  });
+
+  ageCategory = computed(() => {
+    const age = this.user().age;
+    if (age < 18) return 'Menor';
+    if (age < 65) return 'Adulto';
+    return 'Senior';
+  });
+
+  // Métodos para modificar el signal con modelo
+
   updateProfile(): void {
-    // Usar .set() para cambiar el valor
-    this.userName.set('Juan Carlos Pérez');
+    // Actualizar propiedades específicas
+    this.user.set({
+      ...this.user(),// Copia TODAS las propiedades del objeto actual. operador de propagación (...) spread
+      userName: 'Juan Carlos Pérez', // Sobrescribe solo userName
+      email: 'juancarlos.perez@example.com'// Sobrescribe solo email
+    });
     console.log('Perfil actualizado');
   }
 
   sendEmail(): void {
-    console.log(`Enviando email a: ${this.email()}`);
+    console.log(`Enviando email a: ${this.user().email}`);
   }
 
   incrementAge(): void {
-    // Usar .update() para modificar basándose en el valor actual
-    this.age.update(currentAge => currentAge + 1);
+    // Usar update para modificar una propiedad
+    this.user.update(currentUser => ({
+      ...currentUser,
+      age: currentUser.age + 1
+    }));
   }
 }
